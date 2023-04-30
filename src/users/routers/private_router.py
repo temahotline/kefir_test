@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.users.models import User
-from src.users.utils import admin_required
+from src.users.actions.auth_actions import admin_required
 from src.users.actions.private_actions import (
     _get_users_private,
     _create_new_user,

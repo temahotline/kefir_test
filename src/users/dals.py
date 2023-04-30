@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Union, List
+from typing import Union, List, Optional
 
 from sqlalchemy import update, select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,12 +15,12 @@ class UserDAL:
             self,
             first_name: str,
             last_name: str,
-            other_name: str,
+            other_name: Optional[str],
             email: str,
-            phone: str,
-            birthday: date,
-            city: int,
-            additional_info: str,
+            phone: Optional[str],
+            birthday: Optional[date],
+            city: Optional[int],
+            additional_info: Optional[str],
             is_admin: bool,
             hashed_password: str,
     ) -> User:

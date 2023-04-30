@@ -7,7 +7,7 @@ from starlette import status
 from src.users.actions.users_actions import _convert_users_to_list_elements
 from src.users.schemas.users_schemas import (UsersListElementModel,
                                              PaginatedMetaDataModel,)
-from src.users.utils import Hasher
+from src.security import Hasher
 from src.users.dals import UserDAL, CityDAL
 from src.users.schemas.private_schemas import (
     PrivateCreateUserModel,
@@ -21,8 +21,9 @@ from src.users.schemas.private_schemas import (
 
 
 EMAIL_EXEPTION_MESSAGE: str = "Почта уже используется"
-PHONE_EXEPTION_MESSAGE: str = "Телефон уже используется"
 USER_NOT_FOUND_EXEPTION_MESSAGE: str = "Пользователь не найден"
+PHONE_EXEPTION_MESSAGE: str = "Телефон уже используется"
+AUTHORIZATION: str = "Authorization"
 
 
 async def _create_new_user(

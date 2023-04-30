@@ -4,7 +4,6 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from src.users.actions.private_actions import USER_NOT_FOUND_EXEPTION_MESSAGE
 from src.users.dals import UserDAL
 from src.users.models import User
 from src.users.schemas.users_schemas import (
@@ -15,6 +14,9 @@ from src.users.schemas.users_schemas import (
     UpdateUserModel,
     UpdateUserResponseModel,
 )
+
+
+USER_NOT_FOUND_EXEPTION_MESSAGE: str = "Пользователь не найден"
 
 
 async def _convert_users_to_list_elements(

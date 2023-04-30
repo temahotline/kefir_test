@@ -9,10 +9,10 @@ from src.security import create_access_token
 from src.users.models import User
 from src.users.schemas.auth_schemas import LoginModel
 from src.users.schemas.users_schemas import CurrentUserResponseModel
-from src.users.utils import create_auth_response
 from src.users.actions.auth_actions import (
     authenticate_user,
     get_current_user_from_token,
+    _create_auth_response,
 )
 
 
@@ -37,7 +37,7 @@ async def login(
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    return create_auth_response(user, access_token)
+    return _create_auth_response(user, access_token)
 
 
 @auth_router.get("/logout", status_code=200)
