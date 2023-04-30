@@ -1,19 +1,10 @@
-import os
 import asyncio
-from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
+
 from getpass import getpass
 
+from src.database import async_session
+from src.security import Hasher
 from src.users.dals import UserDAL
-from src.users.utils import Hasher
-
-load_dotenv()
-
-DATABASE_URL = os.environ.get("DATABASE_URL")
-engine = create_async_engine(DATABASE_URL)
-Base = declarative_base()
-async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 
 async def create_admin():
@@ -28,18 +19,19 @@ async def create_admin():
         admin = await user_dal.create_user(
             first_name=first_name,
             last_name=last_name,
-            other_name="",  # Заполните другие поля для админа здесь
+            other_name=None,  # Заполните другие поля для админа здесь
             email=email,
-            phone="",
+            phone=None,
             birthday=None,
             city=None,
-            additional_info="",
+            additional_info=None,
             is_admin=True,
             hashed_password=hashed_password,
         )
         await session.commit()
         await session.refresh(admin)
         print(f"Admin user created with ID: {admin.id}")
+
 
 if __name__ == "__main__":
     asyncio.run(create_admin())

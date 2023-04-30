@@ -67,12 +67,12 @@ class PrivateDetailUserResponseModel(BaseModel):
     id: int
     first_name: str
     last_name: str
-    other_name: str
+    other_name: Optional[str]
     email: EmailStr
-    phone: str
-    birthday: date
-    city: int
-    additional_info: str
+    phone: Optional[str]
+    birthday: Optional[date]
+    city: Optional[int]
+    additional_info: Optional[str]
     is_admin: bool
 
 
