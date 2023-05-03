@@ -51,33 +51,34 @@ async def _create_users_list_response(
 
 
 async def _get_users(
-        page: int, size: int, session: AsyncSession
+        page: int, size: int, db: AsyncSession
 ) -> UsersListResponseModel:
-    async with session.begin():
-        user_dal = UserDAL(session)
-        total = await user_dal.get_total_users_count()
-        users = await user_dal.get_users(page=page, size=size)
+    async with db as session:
+        async with session.begin():
+            user_dal = UserDAL(session)
+            total = await user_dal.get_total_users_count()
+            users = await user_dal.get_users(page=page, size=size)
 
-        users_list = await _convert_users_to_list_elements(users)
-        response = await _create_users_list_response(
-            users_list, page, size, total)
-        return response
+            users_list = await _convert_users_to_list_elements(users)
+            response = await _create_users_list_response(
+                users_list, page, size, total)
+            return response
 
 
 async def _update_user(
         user_id: int,
         body: UpdateUserModel,
-        session: AsyncSession,
+        db: AsyncSession,
 ) -> UpdateUserResponseModel:
-    async with session.begin():
-        user_dal = UserDAL(session)
-        user = await user_dal.get_user_by_id(user_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=USER_NOT_FOUND_EXEPTION_MESSAGE
+    async with db as session:
+        async with session.begin():
+            user_dal = UserDAL(session)
+            update_data = body.dict(exclude_unset=True)
+            print(f"update_data: {update_data}")
+            await user_dal.update_user(
+                user_id=user_id,
+                update_data=update_data,
             )
-        update_data = body.dict(exclude_none=True)
-        updated_user = await user_dal.update_user(user, **update_data)
-        return UpdateUserResponseModel(**updated_user.__dict__)
-
+            user = await user_dal.get_user_by_id(user_id)
+            print(f"user: {user}")
+            return UpdateUserResponseModel.from_orm(user)

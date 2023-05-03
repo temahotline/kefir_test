@@ -4,6 +4,11 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
 
+class TunedModel(BaseModel):
+    class Config:
+        orm_mode = True
+
+
 class UpdateUserModel(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -13,17 +18,17 @@ class UpdateUserModel(BaseModel):
     birthday: Optional[str] = None
 
 
-class UpdateUserResponseModel(BaseModel):
+class UpdateUserResponseModel(TunedModel):
     id: int
     first_name: str
     last_name: str
-    other_name: Optional[str]
+    other_name: Optional[str] = None
     email: str
-    phone: Optional[str]
-    birthday: Optional[str]
+    phone: Optional[str] = None
+    birthday: Optional[str] = None
 
 
-class CurrentUserResponseModel(BaseModel):
+class CurrentUserResponseModel(TunedModel):
     first_name: str
     last_name: str
     other_name: Optional[str]
@@ -33,23 +38,23 @@ class CurrentUserResponseModel(BaseModel):
     is_admin: bool
 
 
-class UsersListElementModel(BaseModel):
+class UsersListElementModel(TunedModel):
     id: int
     first_name: str
     last_name: str
     email: EmailStr
 
 
-class PaginatedMetaDataModel(BaseModel):
+class PaginatedMetaDataModel(TunedModel):
     total: int
     page: int
     size: int
 
 
-class UsersListMetaDataModel(BaseModel):
+class UsersListMetaDataModel(TunedModel):
     pagination: PaginatedMetaDataModel
 
 
-class UsersListResponseModel(BaseModel):
+class UsersListResponseModel(TunedModel):
     data: List[UsersListElementModel]
     meta: UsersListMetaDataModel

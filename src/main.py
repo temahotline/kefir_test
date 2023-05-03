@@ -2,7 +2,6 @@ import uvicorn
 
 from fastapi import FastAPI, APIRouter
 
-from src import settings
 from src.users.routers.auth_router import auth_router
 from src.users.routers.private_router import private_router
 from src.users.routers.users_router import users_router
@@ -36,4 +35,4 @@ app.add_exception_handler(500, internal_server_error_handler)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="db", port=settings.APP_PORT)
+    uvicorn.run(app, host="db", port=8000)

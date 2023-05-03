@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict
 
 from sqlalchemy import update, select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,7 +40,7 @@ class UserDAL:
         await self.db_session.flush()
         return new_user
 
-    async def delete_user(self, user_id: int) -> Union[bool, None]:
+    async def delete_user(self, user_id: int) -> bool:
         query = (
             update(User)
             .where(User.id == user_id)
@@ -51,18 +51,23 @@ class UserDAL:
 
         if res.rowcount == 1:
             return True
+        return False
 
-    async def update_user(self, user_id: int, **kwargs) -> Union[User, None]:
+    async def update_user(
+            self, user_id: int, update_data: Dict) -> Optional[User]:
         query = (
             update(User)
             .where(and_(User.id == user_id, User.is_active == True))
-            .values(kwargs)
+            .values(**update_data)
             .returning(User)
         )
+        print(f"query {query}")
         res = await self.db_session.execute(query)
-        user = res.fetchone()
-        if user is not None:
-            return user[0]
+        print(f"res {res}")
+        row = res.fetchone()
+        print(f"row {row}")
+        if row is not None:
+            return User(**row)
 
     async def get_users(self, page: int, size: int,) -> list[User]:
         offset = (page - 1) * size
@@ -84,7 +89,11 @@ class UserDAL:
             return user[0]
 
     async def get_total_users_count(self) -> int:
-        query = select(func.count()).select_from(User).where(User.is_active == True)
+        query = (
+            select(func.count())
+            .select_from(User)
+            .where(User.is_active == True)
+        )
         res = await self.db_session.execute(query)
         return res.scalar()
 
@@ -97,7 +106,14 @@ class UserDAL:
         return None
 
     async def get_user_by_phone(self, phone: str) -> Union[User, None]:
-        query = select(User).where(User.phone == phone)
+        query = (
+            select(User)
+            .where(and_(
+                User.phone == phone,
+                User.phone != None,
+                User.is_active == True,
+            ))
+        )
         res = await self.db_session.execute(query)
         user = res.fetchone()
         if user is not None:

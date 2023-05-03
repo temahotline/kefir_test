@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from fastapi.openapi.models import Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
@@ -34,7 +34,7 @@ async def get_users(
     user: User = Depends(admin_required),
     db: AsyncSession = Depends(get_db),
 ):
-    return await _get_users_private(page=page, size=size, session=db)
+    return await _get_users_private(page=page, size=size, db=db)
 
 
 @private_router.post(
@@ -47,7 +47,7 @@ async def create_user(
     user: User = Depends(admin_required),
     db: AsyncSession = Depends(get_db),
 ):
-    return _create_new_user(body=body, session=db)
+    return await _create_new_user(body=body, db=db)
 
 
 @private_router.get(
@@ -60,7 +60,7 @@ async def get_user(
     user: User = Depends(admin_required),
     db: AsyncSession = Depends(get_db),
 ):
-    return await _get_user_by_id_private(user_id=user_id, session=db)
+    return await _get_user_by_id_private(user_id=user_id, db=db)
 
 
 @private_router.patch(
@@ -74,8 +74,8 @@ async def update_user(
     user: User = Depends(admin_required),
     db: AsyncSession = Depends(get_db),
 ):
-    return _update_user_by_id(
-        user_id=user_id, body=body, session=db
+    return await _update_user_by_id(
+        user_id=user_id, body=body, db=db
     )
 
 
@@ -88,5 +88,6 @@ async def delete_user(
     user: User = Depends(admin_required),
     db: AsyncSession = Depends(get_db),
 ):
-    await _delete_user_by_id(user_id=user_id, session=db)
-    return Response(status_code=204)
+    is_deleted = await _delete_user_by_id(user_id=user_id, db=db)
+    if is_deleted:
+        return JSONResponse(status_code=204, content={})

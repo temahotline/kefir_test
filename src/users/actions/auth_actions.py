@@ -24,17 +24,18 @@ ADMIN_REQUIRED_TEXT: str = "Доступ разрешен только адми�
 
 
 async def _get_user_by_email_for_auth(
-        email: str, session: AsyncSession) -> Union[User, None]:
-    async with session.begin():
-        user_dal = UserDAL(session)
-        user = await user_dal.get_user_by_email(email)
-        return user
+        email: str, db: AsyncSession) -> Union[User, None]:
+    async with db as session:
+        async with session.begin():
+            user_dal = UserDAL(session)
+            user = await user_dal.get_user_by_email(email)
+            return user
 
 
 async def authenticate_user(
     login: str, password: str, db: AsyncSession
 ) -> Union[User, None]:
-    user = await _get_user_by_email_for_auth(email=login, session=db)
+    user = await _get_user_by_email_for_auth(email=login, db=db)
     if user is None:
         return
     if not Hasher.verify_password(password, user.hashed_password):
@@ -64,7 +65,7 @@ async def get_current_user_from_token(
     except JWTError:
         raise CREDENTIALS_EXCEPTION
 
-    user = await _get_user_by_email_for_auth(email=email, session=db)
+    user = await _get_user_by_email_for_auth(email=email, db=db)
     if user is None:
         raise CREDENTIALS_EXCEPTION
     return user

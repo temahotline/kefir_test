@@ -12,6 +12,11 @@ PHONE_REGEX = re.compile(PHONE_REGEX_PATTERN)
 PHONE_VALIDATION_ERROR: str = "Неверный формат номера телефона"
 
 
+class TunedModel(BaseModel):
+    class Config:
+        orm_mode = True
+
+
 class PrivateCreateUserModel(BaseModel):
     first_name: constr(
         strip_whitespace=True, min_length=1, max_length=50,
@@ -63,33 +68,33 @@ class PrivateUpdateUserModel(BaseModel):
         return phone
 
 
-class PrivateDetailUserResponseModel(BaseModel):
+class PrivateDetailUserResponseModel(TunedModel):
     id: int
     first_name: str
     last_name: str
-    other_name: Optional[str]
+    other_name: Optional[str] = None
     email: EmailStr
-    phone: Optional[str]
-    birthday: Optional[date]
-    city: Optional[int]
-    additional_info: Optional[str]
+    phone: Optional[str] = None
+    birthday: Optional[date] = None
+    city: Optional[int] = None
+    additional_info: Optional[str] = None
     is_admin: bool
 
 
-class CitiesHintModel(BaseModel):
+class CitiesHintModel(TunedModel):
     id: int
     name: str
 
 
-class PrivateUsersListHintMetaModel(BaseModel):
+class PrivateUsersListHintMetaModel(TunedModel):
     city: List[CitiesHintModel]
 
 
-class PrivateUsersListMetaDataModel(BaseModel):
+class PrivateUsersListMetaDataModel(TunedModel):
     pagination: PaginatedMetaDataModel
     hint: PrivateUsersListHintMetaModel
 
 
-class PrivateUsersListResponseModel(BaseModel):
+class PrivateUsersListResponseModel(TunedModel):
     data: List[UsersListElementModel]
     meta: PrivateUsersListMetaDataModel

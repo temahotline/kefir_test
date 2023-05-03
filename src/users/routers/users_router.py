@@ -23,7 +23,7 @@ async def get_users(
     size: int = Query(20, gt=0),
     db: AsyncSession = Depends(get_db),
 ):
-    return await _get_users(page=page, size=size, session=db)
+    return await _get_users(page=page, size=size, db=db)
 
 
 @users_router.get(
@@ -48,4 +48,4 @@ async def update_current_user(
     user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db),
 ):
-    return _update_user(user_id=user.id, body=body, session=db)
+    return await _update_user(user_id=user.id, body=body, db=db)
