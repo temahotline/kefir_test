@@ -1,4 +1,4 @@
-# Тестовое задание на вакансию Python разрабочика для компании "Кефир"
+# Тестовое задание на вакансию Python разрабочика для компании "KEFIR"
 
 [Cсылка на задание](https://drive.google.com/file/d/1JuEN0uybRdX1ynBuOI3scBdPMfiikot2/view)
 
