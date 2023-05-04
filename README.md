@@ -2,6 +2,8 @@
 
 [Cсылка на задание](https://drive.google.com/file/d/1JuEN0uybRdX1ynBuOI3scBdPMfiikot2/view)
 
+Разрабочик: Артём Гончаров
+
 Технологии: FastAPI, Python3.11, PostgreSQL, SQLAlchemy, Uvicorn, Pydantic, Pytest, Docker
 
 ## Инструкция по запуску
