@@ -1,8 +1,6 @@
 from typing import List
 
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
 
 from src.users.dals import UserDAL
 from src.users.models import User
@@ -74,11 +72,9 @@ async def _update_user(
         async with session.begin():
             user_dal = UserDAL(session)
             update_data = body.dict(exclude_unset=True)
-            print(f"update_data: {update_data}")
             await user_dal.update_user(
                 user_id=user_id,
                 update_data=update_data,
             )
             user = await user_dal.get_user_by_id(user_id)
-            print(f"user: {user}")
             return UpdateUserResponseModel.from_orm(user)

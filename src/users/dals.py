@@ -61,11 +61,8 @@ class UserDAL:
             .values(**update_data)
             .returning(User)
         )
-        print(f"query {query}")
         res = await self.db_session.execute(query)
-        print(f"res {res}")
         row = res.fetchone()
-        print(f"row {row}")
         if row is not None:
             return User(**row)
 

@@ -19,7 +19,7 @@ async def create_admin():
         admin = await user_dal.create_user(
             first_name=first_name,
             last_name=last_name,
-            other_name=None,  # Заполните другие поля для админа здесь
+            other_name=None,
             email=email,
             phone=None,
             birthday=None,
