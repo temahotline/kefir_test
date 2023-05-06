@@ -24,18 +24,19 @@ ADMIN_REQUIRED_TEXT: str = "Доступ разрешен только адми�
 
 
 async def _get_user_by_email_for_auth(
-        email: str, db: AsyncSession) -> Union[User, None]:
-    async with db as session:
-        async with session.begin():
-            user_dal = UserDAL(session)
-            user = await user_dal.get_user_by_email(email)
-            return user
+        email: str, session: AsyncSession) -> Union[User, None]:
+    async with session.begin():
+        user_dal = UserDAL(session)
+        user = await user_dal.get_user_by_email(email)
+        return user
 
 
 async def authenticate_user(
-    login: str, password: str, db: AsyncSession
+    login: str, password: str, session: AsyncSession
 ) -> Union[User, None]:
-    user = await _get_user_by_email_for_auth(email=login, db=db)
+    user = await _get_user_by_email_for_auth(
+        email=login, session=session
+    )
     if user is None:
         return
     if not Hasher.verify_password(password, user.hashed_password):
@@ -52,20 +53,25 @@ async def get_token_from_cookie(request: Request):
 
 async def get_current_user_from_token(
         token: str = Depends(get_token_from_cookie),
-        db: AsyncSession = Depends(get_db)
+        session: AsyncSession = Depends(get_db)
 ):
     if not token:
         raise CREDENTIALS_EXCEPTION
 
     try:
-        payload = decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = decode(
+            token, settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
         email: str = payload.get("sub")
         if email is None:
             raise CREDENTIALS_EXCEPTION
     except JWTError:
         raise CREDENTIALS_EXCEPTION
 
-    user = await _get_user_by_email_for_auth(email=email, db=db)
+    user = await _get_user_by_email_for_auth(
+        email=email, session=session
+    )
     if user is None:
         raise CREDENTIALS_EXCEPTION
     return user

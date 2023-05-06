@@ -21,9 +21,9 @@ users_router = APIRouter()
 async def get_users(
     page: int = Query(1, gt=0),
     size: int = Query(20, gt=0),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    return await _get_users(page=page, size=size, db=db)
+    return await _get_users(page=page, size=size, session=session)
 
 
 @users_router.get(
@@ -33,7 +33,7 @@ async def get_users(
 )
 async def get_current_user(
     user: User = Depends(get_current_user_from_token),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
     return user
 
@@ -46,6 +46,8 @@ async def get_current_user(
 async def update_current_user(
     body: UpdateUserModel,
     user: User = Depends(get_current_user_from_token),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    return await _update_user(user_id=user.id, body=body, db=db)
+    return await _update_user(
+        user_id=user.id, body=body, session=session,
+    )
