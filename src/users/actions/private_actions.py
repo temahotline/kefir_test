@@ -24,82 +24,81 @@ EMAIL_EXEPTION_MESSAGE: str = "Почта уже используется"
 USER_NOT_FOUND_EXEPTION_MESSAGE: str = "Пользователь не найден"
 PHONE_EXEPTION_MESSAGE: str = "Телефон уже используется"
 AUTHORIZATION: str = "Authorization"
+USER_NOT_FOUND_EXEPTION = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail=USER_NOT_FOUND_EXEPTION_MESSAGE,
+)
+PHONE_EXEPTION = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail=PHONE_EXEPTION_MESSAGE,
+)
+EMAIL_EXEPTION = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail=EMAIL_EXEPTION_MESSAGE,
+)
 
 
 async def _create_new_user(
-        body: PrivateCreateUserModel, db: AsyncSession
+        body: PrivateCreateUserModel, session: AsyncSession
 ) -> PrivateDetailUserResponseModel:
-    async with db as session:
-        async with session.begin():
-            user_dal = UserDAL(session)
-            email_user = await user_dal.get_user_by_email(
-                email=body.email
-            )
-            phone_user = await user_dal.get_user_by_phone(
-                phone=body.phone
-            )
-            if email_user:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=EMAIL_EXEPTION_MESSAGE
-                )
-            if phone_user:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=PHONE_EXEPTION_MESSAGE
-                )
-            user = await user_dal.create_user(
-                first_name=body.first_name,
-                last_name=body.last_name,
-                other_name=body.other_name,
-                email=body.email,
-                phone=body.phone,
-                birthday=body.birthday,
-                city=body.city,
-                additional_info=body.additional_info,
-                is_admin=body.is_admin,
-                hashed_password=Hasher.get_password_hash(
-                    body.password
-                ),
-            )
-            return PrivateDetailUserResponseModel.from_orm(user)
+    async with session.begin():
+        user_dal = UserDAL(session)
+        email_user = await user_dal.get_user_by_email(
+            email=body.email
+        )
+        phone_user = await user_dal.get_user_by_phone(
+            phone=body.phone
+        )
+        if email_user:
+            raise EMAIL_EXEPTION
+        if phone_user:
+            raise PHONE_EXEPTION
+        user = await user_dal.create_user(
+            first_name=body.first_name,
+            last_name=body.last_name,
+            other_name=body.other_name,
+            email=body.email,
+            phone=body.phone,
+            birthday=body.birthday,
+            city=body.city,
+            additional_info=body.additional_info,
+            is_admin=body.is_admin,
+            hashed_password=Hasher.get_password_hash(
+                body.password
+            ),
+        )
+        return PrivateDetailUserResponseModel.from_orm(user)
 
 
 async def _update_user_by_id(
         user_id: int,
         body: PrivateUpdateUserModel,
-        db: AsyncSession,
+        session: AsyncSession,
 ) -> PrivateDetailUserResponseModel:
-    async with db as session:
-        async with session.begin():
-            user_dal = UserDAL(session)
-            update_data = body.dict(exclude_unset=True)
-            user = await user_dal.update_user(user_id, update_data)
-            return PrivateDetailUserResponseModel.from_orm(user)
+    async with session.begin():
+        user_dal = UserDAL(session)
+        update_data = body.dict(exclude_unset=True)
+        user = await user_dal.update_user(user_id, update_data)
+        return PrivateDetailUserResponseModel.from_orm(user)
 
 
 async def _delete_user_by_id(
-        user_id: int, db: AsyncSession) -> bool:
-    async with db as session:
-        async with session.begin():
-            user_dal = UserDAL(session)
-            res = await user_dal.delete_user(user_id)
-            return res
+        user_id: int, session: AsyncSession) -> bool:
+    async with session.begin():
+        user_dal = UserDAL(session)
+        res = await user_dal.delete_user(user_id)
+        return res
 
 
 async def _get_user_by_id_private(
-        user_id: int, db: AsyncSession
+        user_id: int, session: AsyncSession
 ) -> PrivateDetailUserResponseModel:
-    async with db as session:
-        async with session.begin():
-            user_dal = UserDAL(session)
-            user = await user_dal.get_user_by_id(user_id)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=USER_NOT_FOUND_EXEPTION_MESSAGE
-                )
-            return PrivateDetailUserResponseModel.from_orm(user)
+    async with session.begin():
+        user_dal = UserDAL(session)
+        user = await user_dal.get_user_by_id(user_id)
+        if not user:
+            raise USER_NOT_FOUND_EXEPTION
+        return PrivateDetailUserResponseModel.from_orm(user)
 
 
 async def _get_cities(
@@ -135,17 +134,16 @@ async def _create_private_users_list_response(
 
 
 async def _get_users_private(
-        page: int, size: int, db: AsyncSession
+        page: int, size: int, session: AsyncSession
 ) -> PrivateUsersListResponseModel:
-    async with db as session:
-        async with session.begin():
-            user_dal = UserDAL(session)
-            total = await user_dal.get_total_users_count()
-            users = await user_dal.get_users(page=page, size=size)
+    async with session.begin():
+        user_dal = UserDAL(session)
+        total = await user_dal.get_total_users_count()
+        users = await user_dal.get_users(page=page, size=size)
 
-            users_list_elements = await _convert_users_to_list_elements(users)
-            cities_hints = await _get_cities(session)
-            response = await _create_private_users_list_response(
-                users_list_elements, cities_hints, page, size, total
-            )
-            return response
+        users_list_elements = await _convert_users_to_list_elements(users)
+        cities_hints = await _get_cities(session)
+        response = await _create_private_users_list_response(
+            users_list_elements, cities_hints, page, size, total
+        )
+        return response

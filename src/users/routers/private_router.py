@@ -32,9 +32,11 @@ async def get_users(
     page: int = Query(1, gt=0),
     size: int = Query(20, gt=0),
     user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    return await _get_users_private(page=page, size=size, db=db)
+    return await _get_users_private(
+        page=page, size=size, session=session,
+    )
 
 
 @private_router.post(
@@ -45,9 +47,9 @@ async def get_users(
 async def create_user(
     body: PrivateCreateUserModel,
     user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    return await _create_new_user(body=body, db=db)
+    return await _create_new_user(body=body, session=session)
 
 
 @private_router.get(
@@ -58,9 +60,11 @@ async def create_user(
 async def get_user(
     user_id: int,
     user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    return await _get_user_by_id_private(user_id=user_id, db=db)
+    return await _get_user_by_id_private(
+        user_id=user_id, session=session,
+    )
 
 
 @private_router.patch(
@@ -72,10 +76,10 @@ async def update_user(
     user_id: int,
     body: PrivateUpdateUserModel,
     user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
     return await _update_user_by_id(
-        user_id=user_id, body=body, db=db
+        user_id=user_id, body=body, session=session,
     )
 
 
@@ -86,8 +90,10 @@ async def update_user(
 async def delete_user(
     user_id: int,
     user: User = Depends(admin_required),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ):
-    is_deleted = await _delete_user_by_id(user_id=user_id, db=db)
+    is_deleted = await _delete_user_by_id(
+        user_id=user_id, session=session,
+    )
     if is_deleted:
         return JSONResponse(status_code=204, content={})

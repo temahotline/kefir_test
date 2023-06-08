@@ -17,20 +17,23 @@ from src.users.actions.auth_actions import (
 
 
 auth_router = APIRouter()
+INCORRECT_EMAIL_OR_PASSWORD = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail={"code": 400,
+            "message": "Incorrect email or password"},
+)
 
 
 @auth_router.post("/login", response_model=CurrentUserResponseModel)
 async def login(
-        login_model: LoginModel, db: AsyncSession = Depends(get_db)):
+        login_model: LoginModel,
+        session: AsyncSession = Depends(get_db),
+):
     user = await authenticate_user(
-        login_model.login, login_model.password, db
+        login_model.login, login_model.password, session
     )
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"code": 400,
-                    "message": "Incorrect email or password"},
-        )
+        raise INCORRECT_EMAIL_OR_PASSWORD
     access_token_expires = timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -43,7 +46,7 @@ async def login(
 @auth_router.get("/logout", status_code=200)
 async def logout(
     current_user: User = Depends(get_current_user_from_token),
-    db: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_db)
 ) -> Response:
     response = Response(status_code=200)
     response.delete_cookie(key="Authorization")
